@@ -35,7 +35,7 @@ WIP
 
 ## License
 
-MIT
+MIT<br />
 Free Software<br />
 
 **I AM NOT RESPONSIBLE FOR ANY INCORRECT USAGE OF THIS APPLICATION** <br />
