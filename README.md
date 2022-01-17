@@ -5,7 +5,7 @@
 <br /> 
  
 ## Description
-AUC Registration Program is a .NET console application responsible fo automatically registering courses each semester
+AUC Registration Program is a .NET console application responsible for automatically registering courses each semester
 
 ## Features
 
