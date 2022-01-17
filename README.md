@@ -1,4 +1,4 @@
-# AUC Registration Program
+#Registration Program
 [![Selenium](https://avatars.githubusercontent.com/u/983927?s=200&v=4)](https://www.selenium.dev/)
 ## Version
 1.1.6
