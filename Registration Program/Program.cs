@@ -21,6 +21,7 @@ namespace Registration_Program
         private const string RegistrationUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/bwskfreg.P_AltPin";
         private const int LoadingTimoutInSeconds = 15;
         private const int TimeCheckCountdownInMilliSeconds = 1000;
+        private const int CoursesToRegisterAtATime = 2;
 
         private static string _username;
         private static string _password;
@@ -30,11 +31,8 @@ namespace Registration_Program
         private static IWebDriver _webDriver;
         private static WebDriverWait _webDriverWait;
 
-        private static readonly List<string> CrnsInputBoxesIds = new List<string>()
-        {
-            "crn_id1", "crn_id2", "crn_id3", "crn_id4", "crn_id5", "crn_id6", "crn_id7", "crn_id8", "crn_id9",
-            "crn_id10"
-        };
+        private static readonly List<string> CrnsInputBoxesIds = new() 
+            {"crn_id1", "crn_id2", "crn_id3", "crn_id4", "crn_id5", "crn_id6", "crn_id7", "crn_id8", "crn_id9", "crn_id10"};
 
         private static void Main()
         {
@@ -68,10 +66,7 @@ namespace Registration_Program
                 _webDriver.Close();
                 _webDriver.Quit();
             }
-            catch (Exception)
-            {
-                /* Ignored */
-            }
+            catch (Exception) { /* Ignored */ }
 
             Environment.Exit(0);
         }
@@ -106,15 +101,11 @@ namespace Registration_Program
                 {
                     if (!string.IsNullOrEmpty(password))
                     {
-                        // remove one character from the list of password characters
                         password = password.Substring(0, password.Length - 1);
-                        // get the location of the cursor
+                        
                         int pos = Console.CursorLeft;
-                        // move the cursor to the left by one character
                         Console.SetCursorPosition(pos - 1, Console.CursorTop);
-                        // replace it with space
                         Console.Write(" ");
-                        // move the cursor to the left by one character again
                         Console.SetCursorPosition(pos - 1, Console.CursorTop);
                     }
                 }
@@ -122,7 +113,6 @@ namespace Registration_Program
                 info = Console.ReadKey(true);
             }
 
-            // add a new line because user pressed enter at the end of their password
             Console.WriteLine();
             return password;
         }
@@ -199,10 +189,10 @@ namespace Registration_Program
             {
                 coursesInputted++;
                 GetElement(By.Id(CrnsInputBoxesIds[i])).SendKeys(courses[i]);
-                if (!IsTesting && coursesInputted % 3 == 0) SubmitRegistration();
+                if (!IsTesting && coursesInputted % CoursesToRegisterAtATime == 0) SubmitRegistration();
             }
 
-            if (!IsTesting && coursesInputted % 3 != 0) SubmitRegistration();
+            if (!IsTesting && coursesInputted % CoursesToRegisterAtATime != 0) SubmitRegistration();
         }
 
         private static void SubmitRegistration()
