@@ -2,8 +2,7 @@
 [![Selenium](https://avatars.githubusercontent.com/u/983927?s=200&v=4)](https://www.selenium.dev/)
 ## Version
 1.1.6
- 
- 
+<br /> 
  
 ## Description
 AUC Registration Program is a .NET console application responsible fo automatically registering courses each semester
@@ -15,7 +14,7 @@ AUC Registration Program is a .NET console application responsible fo automatica
 - Watch the magic happen at 12:00 AM
 - Mostly reliable 👍
 
-> I am not by any means respoinble for any failures of the application on your side
+> I am not by any means respoinble for any failures of the application on your side <br />
 > I'm a freshman, give me a break
 
 
@@ -39,8 +38,8 @@ WIP
 MIT
 
 **Free Software**<br />
-**I AM NOT RESPONSIBLE FOR ANY INCORRECT USAGE OF THIS APPLICATION**
-**THIS IS ONLY FOR EDUCATIONAL PURPOSES DON'T SUE ME I'M 18**
+**I AM NOT RESPONSIBLE FOR ANY INCORRECT USAGE OF THIS APPLICATION** <br />
+**THIS IS ONLY FOR EDUCATIONAL PURPOSES DON'T SUE ME I'M 18** <br />
 **LEGAL STUFF APPLIES**
 ![legal stuff applies](https://i.imgur.com/kM8Pp3g.png)
 
