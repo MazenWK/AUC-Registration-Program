@@ -10,22 +10,21 @@ using OpenQA.Selenium.Support.UI;
 
 namespace Registration_Program
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Local")]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     [SuppressMessage("ReSharper", "IdentifierTypo")]
     internal static class Program
     {
         private static readonly bool IsTesting = bool.Parse(ConfigurationManager.AppSettings.Get("Testing") ?? "True");
 
-        private const string BannerUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/twbkwbis.P_WWWLogin";
-        private const string RegistrationUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/bwskfreg.P_AltPin";
+        private const string LoginPageUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/twbkwbis.P_WWWLogin";
+        private const string CoursesRegistrationPageUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/bwskfreg.P_AltPin";
         private const int LoadingTimoutInSeconds = 15;
         private const int TimeCheckCountdownInMilliSeconds = 1000;
         private const int CoursesToRegisterAtATime = 2;
 
         private static string _username;
         private static string _password;
-        private static string _semester;
+        private static string _term;
         private static List<string> _coursesCrns;
 
         private static IWebDriver _webDriver;
@@ -39,28 +38,32 @@ namespace Registration_Program
             GetCredentials();
             GetRegistrationInfo();
 
-            CreateDrivers();
-            NavigateToUrl(BannerUrl);
+            CreateWebDrivers();
+            NavigateToUrl(LoginPageUrl);
 
             SignIn();
             while (!IsSignedIn())
             {
-                Output.OutputError("Unable to sign in - Invalid credentials");
-                NavigateToUrl(BannerUrl);
+                ConsoleWindow.Focus();
+                ConsoleOutput.OutputError("Unable to sign in - Invalid credentials");
+                NavigateToUrl(LoginPageUrl);
                 GetCredentials();
                 SignIn();
             }
 
-            NavigateToUrl(RegistrationUrl);
-            ChooseTerm(_semester);
+            NavigateToUrl(CoursesRegistrationPageUrl);
+            ChooseTerm(_term);
 
-            WaitTillMidnight();
+            if (!IsTesting) 
+                WaitTillMidnight();
+            
             RegisterCourses(_coursesCrns);
 
-            Output.OutputMessage($"Successfuly {_coursesCrns.Count} courses");
-            Output.OutputError("Press any key to quit");
+            ConsoleOutput.OutputMessage($"Successfuly registered {_coursesCrns.Count} courses");
+            ConsoleOutput.OutputError("Press any key to quit");
             Console.ReadKey();
-
+            ConsoleOutput.OutputError("Quitting...");
+            
             try
             {
                 _webDriver.Close();
@@ -81,7 +84,7 @@ namespace Registration_Program
 
             while (!(IsValid(_username) && IsValid(_password)))
             {
-                Output.OutputError("Invalid input - Input credentials again");
+                ConsoleOutput.OutputError("Invalid input - Input credentials again");
                 GetCredentials();
             }
         }
@@ -122,13 +125,13 @@ namespace Registration_Program
         private static void GetRegistrationInfo()
         {
             Console.Write("Input full semester name (as stated in AUC banner): ");
-            _semester = Console.ReadLine();
+            _term = Console.ReadLine();
 
             Console.Write("Input courses CRNs (IN ORDER OF IMPORTANCE) with commas separating each CRN: ");
             _coursesCrns = Console.ReadLine()?.Replace(" ", string.Empty).Split(',').ToList();
         }
 
-        private static void CreateDrivers()
+        private static void CreateWebDrivers()
         {
             _webDriver = new ChromeDriver();
             _webDriverWait = new WebDriverWait(_webDriver, new TimeSpan(0, 0, LoadingTimoutInSeconds));
@@ -171,11 +174,12 @@ namespace Registration_Program
 
         private static void WaitTillMidnight()
         {
+            // TODO: Wait till midnight; calculate time difference
             int n = 0;
             while (DateTime.Now.Hour != 0)
             {
-                if (n == 0) Window.Focus();
-                if (n++ % 10 == 0) Output.OutputWarning("Awaiting 12:00 AM");
+                if (n == 0) ConsoleWindow.Focus();
+                if (n++ % 10 == 0) ConsoleOutput.OutputWarning("Awaiting 12:00 AM");
                 Thread.Sleep(TimeCheckCountdownInMilliSeconds);
             }
         }

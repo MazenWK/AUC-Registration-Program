@@ -2,7 +2,7 @@
 
 namespace Registration_Program
 {
-    public static class Output
+    public static class ConsoleOutput
     {
         public static void OutputMessage(string arg)
         {

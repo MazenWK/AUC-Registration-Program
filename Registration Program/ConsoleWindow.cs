@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Registration_Program
 {
-    public static class Window
+    public static class ConsoleWindow
     {
         [DllImport("user32.dll")]
         private static extern bool ShowWindowAsync(HandleRef hWnd, int nCmdShow);
