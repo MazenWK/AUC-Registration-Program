@@ -16,7 +16,7 @@ namespace Registration_Program
     internal static class Program
     {
         private static readonly bool IsTesting = bool.Parse(ConfigurationManager.AppSettings.Get("Testing") ?? "True");
-        
+
         private const string BannerUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/twbkwbis.P_WWWLogin";
         private const string RegistrationUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/bwskfreg.P_AltPin";
         private const int LoadingTimoutInSeconds = 15;
@@ -31,16 +31,19 @@ namespace Registration_Program
         private static WebDriverWait _webDriverWait;
 
         private static readonly List<string> CrnsInputBoxesIds = new List<string>()
-            {"crn_id1", "crn_id2", "crn_id3", "crn_id4", "crn_id5", "crn_id6", "crn_id7", "crn_id8", "crn_id9", "crn_id10"};
+        {
+            "crn_id1", "crn_id2", "crn_id3", "crn_id4", "crn_id5", "crn_id6", "crn_id7", "crn_id8", "crn_id9",
+            "crn_id10"
+        };
 
         private static void Main()
         {
             GetCredentials();
             GetRegistrationInfo();
-            
+
             CreateDrivers();
             NavigateToUrl(BannerUrl);
-            
+
             SignIn();
             while (!IsSignedIn())
             {
@@ -49,13 +52,13 @@ namespace Registration_Program
                 GetCredentials();
                 SignIn();
             }
-            
+
             NavigateToUrl(RegistrationUrl);
             ChooseTerm(_semester);
-            
+
             WaitTillMidnight();
             RegisterCourses(_coursesCrns);
-            
+
             Output.OutputMessage($"Successfuly {_coursesCrns.Count} courses");
             Output.OutputError("Press any key to quit");
             Console.ReadKey();
@@ -65,7 +68,11 @@ namespace Registration_Program
                 _webDriver.Close();
                 _webDriver.Quit();
             }
-            catch (Exception) { /* Ignored */}
+            catch (Exception)
+            {
+                /* Ignored */
+            }
+
             Environment.Exit(0);
         }
 
@@ -73,7 +80,7 @@ namespace Registration_Program
         {
             Console.Write("Input username: ");
             _username = Console.ReadLine();
-            
+
             Console.Write("Input password: ");
             _password = GetPassword();
 
@@ -83,6 +90,7 @@ namespace Registration_Program
                 GetCredentials();
             }
         }
+
         private static string GetPassword()
         {
             string password = "";
@@ -110,18 +118,22 @@ namespace Registration_Program
                         Console.SetCursorPosition(pos - 1, Console.CursorTop);
                     }
                 }
+
                 info = Console.ReadKey(true);
             }
+
             // add a new line because user pressed enter at the end of their password
             Console.WriteLine();
             return password;
         }
+
         private static bool IsValid(string s) => !(string.IsNullOrEmpty(s) && string.IsNullOrWhiteSpace(s));
+
         private static void GetRegistrationInfo()
         {
             Console.Write("Input full semester name (as stated in AUC banner): ");
             _semester = Console.ReadLine();
-            
+
             Console.Write("Input courses CRNs (IN ORDER OF IMPORTANCE) with commas separating each CRN: ");
             _coursesCrns = Console.ReadLine()?.Replace(" ", string.Empty).Split(',').ToList();
         }
@@ -131,9 +143,10 @@ namespace Registration_Program
             _webDriver = new ChromeDriver();
             _webDriverWait = new WebDriverWait(_webDriver, new TimeSpan(0, 0, LoadingTimoutInSeconds));
         }
+
         private static void NavigateToUrl(string url)
         {
-            _webDriver.Navigate().GoToUrl(url);  
+            _webDriver.Navigate().GoToUrl(url);
         }
 
         private static void SignIn()
@@ -142,6 +155,7 @@ namespace Registration_Program
             GetElement(By.Name("PIN")).SendKeys(_password);
             GetElement(By.Id("id____UID0")).Click();
         }
+
         private static bool IsSignedIn()
         {
             try
@@ -158,7 +172,7 @@ namespace Registration_Program
         private static void ChooseTerm(string term)
         {
             IWebElement termSelection = GetElement(By.Name("term_in"));
-            
+
             termSelection.Click();
             termSelection.SendKeys(term);
             termSelection.SendKeys(Keys.Enter);
@@ -175,6 +189,7 @@ namespace Registration_Program
                 Thread.Sleep(TimeCheckCountdownInMilliSeconds);
             }
         }
+
         private static void RegisterCourses(IReadOnlyList<string> courses)
         {
             WaitUntilElementIsLoaded(By.Id("id____UID5"));
@@ -186,9 +201,10 @@ namespace Registration_Program
                 GetElement(By.Id(CrnsInputBoxesIds[i])).SendKeys(courses[i]);
                 if (!IsTesting && coursesInputted % 3 == 0) SubmitRegistration();
             }
-            if (!IsTesting && coursesInputted % 3 != 0) SubmitRegistration();
 
+            if (!IsTesting && coursesInputted % 3 != 0) SubmitRegistration();
         }
+
         private static void SubmitRegistration()
         {
             GetElement(By.Id("id____UID5")).Click();
