@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -14,24 +15,42 @@ namespace Registration_Program
     [SuppressMessage("ReSharper", "IdentifierTypo")]
     internal static class Program
     {
-        private static readonly bool IsTesting = bool.Parse(ConfigurationManager.AppSettings.Get("Testing") ?? "True");
+        #region Configuration Variables
 
-        private const string LoginPageUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/twbkwbis.P_WWWLogin";
-        private const string CoursesRegistrationPageUrl = "https://ssb-prod.ec.aucegypt.edu/PROD/bwskfreg.P_AltPin";
-        private const int LoadingTimoutInSeconds = 15;
-        private const int TimeCheckCountdownInMilliSeconds = 1000;
-        private const int CoursesToRegisterAtATime = 2;
+        private static readonly bool IsTesting = 
+            bool.Parse(ConfigurationManager.AppSettings.Get("IsTesting") ?? "True");
+        private static readonly string LoginPageUrl = 
+            ConfigurationManager.AppSettings.Get("LoginPageUrl");
+        private static readonly string CoursesRegistrationPageUrl = 
+            ConfigurationManager.AppSettings.Get("CoursesRegistrationPageUrl");
+        private static readonly int LoadingTimoutInSeconds = 
+            int.Parse(ConfigurationManager.AppSettings.Get("LoadingTimoutInSeconds") ?? string.Empty);
+        private static readonly int TimeCheckCountdownInMilliSeconds = 
+            int.Parse(ConfigurationManager.AppSettings.Get("TimeCheckCountdownInMilliSeconds") ?? string.Empty);
+        private static readonly int CoursesToRegisterAtATime = 
+            int.Parse(ConfigurationManager.AppSettings.Get("CoursesToRegisterAtATime") ?? string.Empty);
+        private static readonly ImmutableList<string> CrnsInputBoxesIds = 
+            ConfigurationManager.AppSettings.Get("CrnsInputBoxesIds")?.Split(',').ToImmutableList();
+
+        #endregion
+
+        #region User Data
 
         private static string _username;
         private static string _password;
         private static string _term;
         private static List<string> _coursesCrns;
 
+        #endregion
+
+        #region Drivers
+
         private static IWebDriver _webDriver;
         private static WebDriverWait _webDriverWait;
 
-        private static readonly List<string> CrnsInputBoxesIds = new() 
-            {"crn_id1", "crn_id2", "crn_id3", "crn_id4", "crn_id5", "crn_id6", "crn_id7", "crn_id8", "crn_id9", "crn_id10"};
+        #endregion
+
+        #region Main
 
         private static void Main()
         {
@@ -54,15 +73,14 @@ namespace Registration_Program
             NavigateToUrl(CoursesRegistrationPageUrl);
             ChooseTerm(_term);
 
-            if (!IsTesting) 
-                WaitTillMidnight();
+            if (!IsTesting) WaitTillMidnight();
             
             RegisterCourses(_coursesCrns);
 
-            ConsoleOutput.OutputMessage($"Successfuly registered {_coursesCrns.Count} courses");
+            ConsoleOutput.OutputMessage("Successfuly registered courses");
             ConsoleOutput.OutputError("Press any key to quit");
             Console.ReadKey();
-            ConsoleOutput.OutputError("Quitting...");
+            ConsoleOutput.OutputError("\nQuitting...");
             
             try
             {
@@ -73,6 +91,10 @@ namespace Registration_Program
 
             Environment.Exit(0);
         }
+
+        #endregion
+
+        #region Functions
 
         private static void GetCredentials()
         {
@@ -144,16 +166,16 @@ namespace Registration_Program
 
         private static void SignIn()
         {
-            GetElement(By.Name("sid")).SendKeys(_username);
-            GetElement(By.Name("PIN")).SendKeys(_password);
-            GetElement(By.Id("id____UID0")).Click();
+            GetElement(By.Name(ConfigurationManager.AppSettings.Get("LoginUsernameInputBoxElement"))).SendKeys(_username);
+            GetElement(By.Name(ConfigurationManager.AppSettings.Get("LoginPasswordInputBoxElement"))).SendKeys(_password);
+            GetElement(By.Id(ConfigurationManager.AppSettings.Get("LoginButtonElement"))).Click();
         }
 
         private static bool IsSignedIn()
         {
             try
             {
-                WaitUntilElementIsLoaded(By.Id("welcomemessage"));
+                WaitUntilElementIsLoaded(By.Id(ConfigurationManager.AppSettings.Get("WelcomeMessageElement")));
                 return true;
             }
             catch (Exception)
@@ -164,7 +186,7 @@ namespace Registration_Program
 
         private static void ChooseTerm(string term)
         {
-            IWebElement termSelection = GetElement(By.Name("term_in"));
+            IWebElement termSelection = GetElement(By.Name(ConfigurationManager.AppSettings.Get("TermSelectionDropDownElement")));
 
             termSelection.Click();
             termSelection.SendKeys(term);
@@ -175,6 +197,7 @@ namespace Registration_Program
         private static void WaitTillMidnight()
         {
             // TODO: Wait till midnight; calculate time difference
+            // TODO: Break condition
             int n = 0;
             while (DateTime.Now.Hour != 0)
             {
@@ -186,7 +209,7 @@ namespace Registration_Program
 
         private static void RegisterCourses(IReadOnlyList<string> courses)
         {
-            WaitUntilElementIsLoaded(By.Id("id____UID5"));
+            WaitUntilElementIsLoaded(By.Id(ConfigurationManager.AppSettings.Get("SubmitRegistrationButtonElement")));
 
             int coursesInputted = 0;
             for (int i = 0; i < courses.Count; i++)
@@ -201,10 +224,12 @@ namespace Registration_Program
 
         private static void SubmitRegistration()
         {
-            GetElement(By.Id("id____UID5")).Click();
+            GetElement(By.Id(ConfigurationManager.AppSettings.Get("SubmitRegistrationButtonElement"))).Click();
         }
 
         private static IWebElement GetElement(By element) => _webDriver.FindElement(element);
         private static void WaitUntilElementIsLoaded(By element) => _webDriverWait.Until(d => d.FindElement(element));
+
+        #endregion
     }
 }
