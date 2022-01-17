@@ -1,4 +1,3 @@
-not
 # AUC Registration Program
 [![Selenium](https://avatars.githubusercontent.com/u/983927?s=200&v=4)](https://www.selenium.dev/)
 ## Version
@@ -6,7 +5,7 @@ not
 <br /> 
  
 ## Description
-AUC Registration Program is a .NET console application responsible for automatically registering courses each semester
+AUC Registration Program is a .NET console application responsible for automatically registering courses each semester <br />
 
 ## Features
 
