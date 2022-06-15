@@ -27,8 +27,8 @@ namespace Registration_Program
             int.Parse(ConfigurationManager.AppSettings.Get("LoadingTimoutInSeconds") ?? string.Empty);
         private static readonly int TimeCheckCountdownInMilliSeconds = 
             int.Parse(ConfigurationManager.AppSettings.Get("TimeCheckCountdownInMilliSeconds") ?? string.Empty);
-        private static readonly int CoursesToRegisterAtATime = 
-            int.Parse(ConfigurationManager.AppSettings.Get("CoursesToRegisterAtATime") ?? string.Empty);
+        // private static readonly int CoursesToRegisterAtATime = 
+        //     int.Parse(ConfigurationManager.AppSettings.Get("CoursesToRegisterAtATime") ?? string.Empty);
         private static readonly ImmutableList<string> CrnsInputBoxesIds = 
             ConfigurationManager.AppSettings.Get("CrnsInputBoxesIds")?.Split(',').ToImmutableList();
 
@@ -38,6 +38,7 @@ namespace Registration_Program
 
         private static string _username;
         private static string _password;
+        private static int _coursesToRegisterAtATime;
         private static string _term;
         private static List<string> _coursesCrns;
 
@@ -56,16 +57,15 @@ namespace Registration_Program
         {
             GetCredentials();
             GetRegistrationInfo();
+            ConfirmRegistrationInfo();
 
             CreateWebDrivers();
-            NavigateToUrl(LoginPageUrl);
 
             SignIn();
             while (!IsSignedIn())
             {
                 ConsoleWindow.Focus();
                 ConsoleOutput.OutputError("Unable to sign in - Invalid credentials");
-                NavigateToUrl(LoginPageUrl);
                 GetCredentials();
                 SignIn();
             }
@@ -98,6 +98,8 @@ namespace Registration_Program
 
         private static void GetCredentials()
         {
+            ConsoleOutput.OutputWarning("This program is secure and only local, no data is shared outsite your device");
+            
             Console.Write("Input username: ");
             _username = Console.ReadLine();
 
@@ -146,11 +148,27 @@ namespace Registration_Program
 
         private static void GetRegistrationInfo()
         {
+            Console.Write("Input number of courses to register at a time: ");
+            _coursesToRegisterAtATime = int.Parse(Console.ReadLine()!);
+
+            ConsoleOutput.OutputWarning($"This program registers {_coursesToRegisterAtATime} courses at a time before submitting the next {_coursesToRegisterAtATime}");
+            ConsoleOutput.OutputWarning($"If there are any paired courses please make sure they would be registered together (are in the same {_coursesToRegisterAtATime} group)");
+
             Console.Write("Input full semester name (as stated in AUC banner): ");
             _term = Console.ReadLine();
 
             Console.Write("Input courses CRNs (IN ORDER OF IMPORTANCE) with commas separating each CRN: ");
             _coursesCrns = Console.ReadLine()?.Replace(" ", string.Empty).Split(',').ToList();
+        }
+
+        private static void ConfirmRegistrationInfo()
+        {
+            Console.WriteLine($"Semester: {_term}");
+            Console.WriteLine("Coureses CRNS: "); 
+            _coursesCrns.ForEach(Console.WriteLine);
+            
+            ConsoleOutput.OutputWarning("Press enter to confirm registration info");
+            Console.ReadKey();
         }
 
         private static void CreateWebDrivers()
@@ -166,6 +184,8 @@ namespace Registration_Program
 
         private static void SignIn()
         {
+            NavigateToUrl(LoginPageUrl);
+
             GetElement(By.Name(ConfigurationManager.AppSettings.Get("LoginUsernameInputBoxElement"))).SendKeys(_username);
             GetElement(By.Name(ConfigurationManager.AppSettings.Get("LoginPasswordInputBoxElement"))).SendKeys(_password);
             GetElement(By.Id(ConfigurationManager.AppSettings.Get("LoginButtonElement"))).Click();
@@ -216,10 +236,10 @@ namespace Registration_Program
             {
                 coursesInputted++;
                 GetElement(By.Id(CrnsInputBoxesIds[i])).SendKeys(courses[i]);
-                if (!IsTesting && coursesInputted % CoursesToRegisterAtATime == 0) SubmitRegistration();
+                if (!IsTesting && coursesInputted % _coursesToRegisterAtATime == 0) SubmitRegistration();
             }
 
-            if (!IsTesting && coursesInputted % CoursesToRegisterAtATime != 0) SubmitRegistration();
+            if (!IsTesting && coursesInputted % _coursesToRegisterAtATime != 0) SubmitRegistration();
         }
 
         private static void SubmitRegistration()
